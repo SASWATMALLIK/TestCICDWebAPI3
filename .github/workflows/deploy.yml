@@ -56,20 +56,3 @@ jobs:
           IMAGE_TAG=${GITHUB_SHA::8}
           docker push "$ECR_REPOSITORY:$IMAGE_TAG"
           docker push "$ECR_REPOSITORY:latest"
-
-      - name: Update task-definition image
-        run: |
-          IMAGE_TAG=${GITHUB_SHA::8}
-          jq --arg img "$ECR_REPOSITORY:$IMAGE_TAG" '.containerDefinitions[0].image = $img' .github/ecs/task-definition.json > task-def.json
-          cat task-def.json
-
-      - name: Register new Task Definition
-        id: register
-        run: |
-          aws ecs register-task-definition --cli-input-json file://task-def.json --region "$AWS_REGION" > register-output.json
-          echo "TASKDEF_ARN=$(jq -r '.taskDefinition.taskDefinitionArn' register-output.json)" >> "$GITHUB_OUTPUT"
-
-      - name: Update ECS service with new task definition
-        run: |
-          NEW_TASK_ARN=$(jq -r '.taskDefinition.taskDefinitionArn' register-output.json)
-          aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --task-definition "$NEW_TASK_ARN" --force-new-deployment --region "$AWS_REGION"
