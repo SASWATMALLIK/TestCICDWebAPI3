@@ -6,6 +6,7 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -22,7 +23,15 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./TestCICDWebAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+# final stage
 FROM base AS final
 WORKDIR /app
+
+# copy published files
 COPY --from=publish /app/publish .
+
+# ensure Kestrel listens on 0.0.0.0:80
+ENV ASPNETCORE_URLS=http://+:80
+EXPOSE 80
+
 ENTRYPOINT ["dotnet", "TestCICDWebAPI.dll"]
