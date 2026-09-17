@@ -29,5 +29,11 @@ namespace TestCICDWebAPI.Controllers
             })
             .ToArray();
         }
+        
+        [HttpGet(Name = "GetMyName")]
+        public IEnumerable<string> Get()
+        {
+            return "Saswat";
+        }
     }
 }
