@@ -31,7 +31,7 @@ namespace TestCICDWebAPI.Controllers
         }
 
         [HttpGet(Name = "GetMyName")]
-        public IEnumerable<string> GetMyName()
+        public string GetMyName()
         {
             return "Saswat";
         }
