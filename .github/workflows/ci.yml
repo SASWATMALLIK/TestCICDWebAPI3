@@ -97,9 +97,8 @@ jobs:
               "sudo chown -R ssm-user:ssm-user /opt/cicdwebapi",
               "sudo systemctl restart cicdwebapi",
               "echo Waiting for application to start...",
-              "sleep 10",
-              "if curl --fail --silent --show-error http://127.0.0.1:5000/health; then echo New deployment is healthy; else echo New deployment failed health check; echo Rolling back...; sudo rm -rf /opt/cicdwebapi/*; sudo cp -a /opt/cicdwebapi-backup/. /opt/cicdwebapi/; sudo chown -R ssm-user:ssm-user /opt/cicdwebapi; sudo systemctl restart cicdwebapi; sleep 5; echo Previous version restored; exit 1; fi"
-            ]' \
+              "for i in {1..12}; do if curl --fail --silent --show-error http://127.0.0.1:5000/health; then echo New deployment is healthy; exit 0; fi; echo Application not ready yet... retrying in 5 seconds; sleep 5; done; echo New deployment failed health check; echo Rolling back...; sudo rm -rf /opt/cicdwebapi/*; sudo cp -a /opt/cicdwebapi-backup/. /opt/cicdwebapi/; sudo chown -R ssm-user:ssm-user /opt/cicdwebapi; sudo systemctl restart cicdwebapi; sleep 5; echo Previous version restored; exit 1"
+              ]' \
             --query "Command.CommandId" \
             --output text)
 
@@ -115,9 +114,17 @@ jobs:
 
       - name: Health check
         run: |
-          echo "Waiting for application to start..."
-          sleep 10
+          echo "Checking public HTTPS endpoint..."
 
-          curl --fail https://saswatmallik.in/health
+          for i in {1..12}; do
+            if curl --fail --silent --show-error https://saswatmallik.in/health; then
+              echo "Health check passed!"
+              exit 0
+            fi
 
-          echo "Health check passed!"
+            echo "Public endpoint not ready yet... retrying in 5 seconds."
+            sleep 5
+          done
+
+          echo "Health check failed after 60 seconds."
+          exit 1
