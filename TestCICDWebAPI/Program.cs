@@ -4,11 +4,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
+    .MinimumLevel.Warning()
     .WriteTo.Console()
     .WriteTo.File(
        "/var/log/cicdwebapi/application-.log",
         rollingInterval: RollingInterval.Day,
+        rollOnFileSizeLimit: true,
+        fileSizeLimitBytes: 5 * 1024 * 1024,
         retainedFileCountLimit: 30,
         shared: true,
         outputTemplate:
