@@ -15,8 +15,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
+//As NgInx will do the redirection, it's not needed.
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
