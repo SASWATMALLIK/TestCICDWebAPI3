@@ -15,9 +15,13 @@ namespace TestCICDWebAPI.Controllers
         }
 
         [HttpGet(Name = "Health")]
-        public bool Get()
+        public ActionResult Get()
         {
-            return true;
+            return Ok(new
+            {
+                status = "Healthy",
+                timestamp = DateTime.UtcNow
+            });
         }
 
     }
