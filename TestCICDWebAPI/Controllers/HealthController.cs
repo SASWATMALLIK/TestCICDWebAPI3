@@ -17,6 +17,12 @@ namespace TestCICDWebAPI.Controllers
         [HttpGet(Name = "Health")]
         public ActionResult Get()
         {
+            _logger.LogInformation("Health API was called");
+
+            _logger.LogInformation(
+                "Health API request received at {Time}",
+                DateTime.UtcNow);
+
             return Ok(new
             {
                 status = "Healthy",
