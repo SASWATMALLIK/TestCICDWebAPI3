@@ -86,13 +86,19 @@ jobs:
             --instance-ids i-075eff4bf0d5c2c98 \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
+              "echo Starting deployment...",
+              "sudo rm -rf /opt/cicdwebapi-backup",
+              "sudo mkdir -p /opt/cicdwebapi-backup",
+              "sudo cp -a /opt/cicdwebapi/. /opt/cicdwebapi-backup/",
+              "echo Current application backed up",
               "aws s3 cp s3://testcicdwebapi3-deployment-092026/deploy/TestCICDWebAPI-${{ github.sha }}.zip /tmp/TestCICDWebAPI.zip",
               "sudo rm -rf /opt/cicdwebapi/*",
               "sudo unzip -o /tmp/TestCICDWebAPI.zip -d /opt/cicdwebapi",
+              "sudo chown -R ssm-user:ssm-user /opt/cicdwebapi",
               "sudo systemctl restart cicdwebapi",
-              "sleep 5",
-              "sudo systemctl is-active --quiet cicdwebapi",
-              "curl -f http://127.0.0.1:5000/Health"
+              "echo Waiting for application to start...",
+              "sleep 10",
+              "if curl --fail --silent --show-error http://127.0.0.1:5000/health; then echo New deployment is healthy; else echo New deployment failed health check; echo Rolling back...; sudo rm -rf /opt/cicdwebapi/*; sudo cp -a /opt/cicdwebapi-backup/. /opt/cicdwebapi/; sudo chown -R ssm-user:ssm-user /opt/cicdwebapi; sudo systemctl restart cicdwebapi; sleep 5; echo Previous version restored; exit 1; fi"
             ]' \
             --query "Command.CommandId" \
             --output text)
