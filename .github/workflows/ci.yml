@@ -89,7 +89,10 @@ jobs:
               "aws s3 cp s3://testcicdwebapi3-deployment-092026/deploy/TestCICDWebAPI-${{ github.sha }}.zip /tmp/TestCICDWebAPI.zip",
               "sudo rm -rf /opt/cicdwebapi/*",
               "sudo unzip -o /tmp/TestCICDWebAPI.zip -d /opt/cicdwebapi",
-              "sudo systemctl restart cicdwebapi"
+              "sudo systemctl restart cicdwebapi",
+              "sleep 5",
+              "sudo systemctl is-active --quiet cicdwebapi",
+              "curl -f http://127.0.0.1:5000/Health"
             ]' \
             --query "Command.CommandId" \
             --output text)
